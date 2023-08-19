@@ -52,9 +52,11 @@ public class PlayerController : MonoBehaviour
         Debug.Log("낙하 시작 지점은 = " + fallingStart.y);
         Debug.Log("현재 땅인지 ? = " + isOnGround);
 
+        //카메라에 포지션값 넘기기
         vCam.GetComponent<CinemachineVirtualCamera>().Follow = this.transform;
         cameraManager.SetTarget(transform.position);
 
+        //낙하 중
         if (!isOnGround && !isDie)
         {
             fallingDistance = fallingStart.y - this.transform.position.y;
@@ -71,10 +73,7 @@ public class PlayerController : MonoBehaviour
         }
 
 
-
-
-
-
+        //캐릭터 이동
         if (gameManager.isGameActive && !isDie)
         {
             Debug.Log("속도는 =" + rb.velocity);
@@ -88,6 +87,7 @@ public class PlayerController : MonoBehaviour
             Vector2 movement = new Vector2(moveX * moveSpeed, rb.velocity.y);
             rb.velocity = movement;
 
+            //회전
             rb.AddTorque(-moveX / 20, ForceMode2D.Force);
 
             if (rb.velocity.y < maxVelocity)
@@ -102,6 +102,7 @@ public class PlayerController : MonoBehaviour
                 isOnGround = false;
             }
 
+            //변신
             if (Input.GetKeyDown(KeyCode.LeftShift) || Input.GetKeyDown(KeyCode.X))
             {
                 ChangeToPlatform();
@@ -111,14 +112,11 @@ public class PlayerController : MonoBehaviour
             previousVelocityY = rb.velocity.y;
         }
 
-
-
-
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        if (collision.gameObject.tag == "Ground")
+        if (collision.gameObject.tag == "Ground" || collision.gameObject.tag == "Player")
         {
             isOnGround = true;
             fallingStart.y = 0f;
@@ -128,6 +126,12 @@ public class PlayerController : MonoBehaviour
         {
             Die();
         }
+
+        if (collision.gameObject.tag == "Obstacle")
+        {
+            Die();
+        }
+
     }
 
     private void OnCollisionExit2D(Collision2D collision)
