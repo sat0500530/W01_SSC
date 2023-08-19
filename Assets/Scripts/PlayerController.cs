@@ -20,7 +20,7 @@ public class PlayerController : MonoBehaviour
     private SpawnManager spawnManager;
     private GameObject vCam;
 
-
+    float previousVelocityY;
     private Vector2 fallingStart;
 
     //float previousVelocityY;
@@ -47,15 +47,22 @@ public class PlayerController : MonoBehaviour
 
     private void Update()
     {
-        Debug.Log("속도는 =" + rb.velocity);
+
         Debug.Log("낙하 거리는 = " + fallingDistance);
         Debug.Log("낙하 시작 지점은 = " + fallingStart.y);
         Debug.Log("현재 땅인지 ? = " + isOnGround);
 
+        vCam.GetComponent<CinemachineVirtualCamera>().Follow = this.transform;
+        cameraManager.SetTarget(transform.position);
 
-        if (!isOnGround)
+        if (!isOnGround && !isDie)
         {
             fallingDistance = fallingStart.y - this.transform.position.y;
+
+            //낙하거리 비례 색 변환
+            float percentage = Mathf.Clamp01(fallingDistance / maxFallingDistance);
+            Color newColor = Color.Lerp(initialColor, targetColor, percentage);
+            objectRenderer.material.color = newColor;
 
             if (fallingDistance > maxFallingDistance)
             {
@@ -63,36 +70,37 @@ public class PlayerController : MonoBehaviour
             }
         }
 
-        vCam.GetComponent<CinemachineVirtualCamera>().Follow = this.transform;
-        cameraManager.SetTarget(transform.position);
 
-        //점프 제거
-        //if (!isOnGround && Mathf.Abs(rb.velocity.y) < 0.0001f && previousVelocityY < 0)
-        //{
-        //    isOnGround = true;
-        //}
+
+
+
 
         if (gameManager.isGameActive && !isDie)
         {
+            Debug.Log("속도는 =" + rb.velocity);
+
+            if (!isOnGround && Mathf.Abs(rb.velocity.y) < 0.0001f && previousVelocityY < 0)
+            {
+                isOnGround = true;
+            }
+
             float moveX = Input.GetAxis("Horizontal");
             Vector2 movement = new Vector2(moveX * moveSpeed, rb.velocity.y);
             rb.velocity = movement;
 
-            rb.AddTorque(-moveX, ForceMode2D.Force);
-
-            Debug.Log(moveX);
+            rb.AddTorque(-moveX / 20, ForceMode2D.Force);
 
             if (rb.velocity.y < maxVelocity)
             {
                 rb.velocity = new Vector2(rb.velocity.x, maxVelocity);
             }
 
-            //점프 제거
-            //if (Input.GetKeyDown(KeyCode.Space) && isOnGround)
-            //{
-            //    rb.AddForce(new Vector2(0f, jumpForce), ForceMode2D.Impulse);
-            //    isOnGround = false;
-            //}
+            //점프
+            if (Input.GetKeyDown(KeyCode.Space) && isOnGround)
+            {
+                rb.AddForce(new Vector2(0f, jumpForce), ForceMode2D.Impulse);
+                isOnGround = false;
+            }
 
             if (Input.GetKeyDown(KeyCode.LeftShift) || Input.GetKeyDown(KeyCode.X))
             {
@@ -100,29 +108,11 @@ public class PlayerController : MonoBehaviour
                 Destroy(this);
             }
 
-            if (Input.GetKeyDown(KeyCode.UpArrow))
-            {
-                transform.Rotate(Vector3.forward * 90);
-            }
-
-
-            if (Input.GetKeyDown(KeyCode.DownArrow))
-            {
-                transform.Rotate(Vector3.forward * -90);
-            }
+            previousVelocityY = rb.velocity.y;
         }
 
 
-        // Calculate the percentage of falling distance relative to maxFallingDistance
-        float percentage = Mathf.Clamp01(fallingDistance / maxFallingDistance);
 
-        // Interpolate between initialColor and targetColor based on the percentage
-        Color newColor = Color.Lerp(initialColor, targetColor, percentage);
-
-        // Update the object's Material color property
-        objectRenderer.material.color = newColor;
-
-        //previousVelocityY = rb.velocity.y;
 
     }
 
@@ -133,6 +123,10 @@ public class PlayerController : MonoBehaviour
             isOnGround = true;
             fallingStart.y = 0f;
             fallingDistance = 0f;
+        }
+        if (collision.gameObject.tag == "Wall")
+        {
+            Die();
         }
     }
 
@@ -147,6 +141,8 @@ public class PlayerController : MonoBehaviour
     {
         this.GetComponent<Animator>().SetBool("IsDie", true);
         rb.velocity = Vector2.zero;
+        objectRenderer.material.color = Color.red;
+        Destroy(rb);
         isDie = true;
     }
 
@@ -158,8 +154,8 @@ public class PlayerController : MonoBehaviour
 
     private void ChangeToPlatform()
     {
-        // player 자리에 platform prefab 소환 후, player 오브젝트 제거, 그리고 player 소환
         Destroy(rb);
+        objectRenderer.material.color = Color.white;
         spawnManager.SpawnPlayer();
     }
 }
