@@ -13,8 +13,6 @@ public class SpawnManager : MonoBehaviour
         GameObject playerPrefab = playerPrefabs;
         Instantiate(playerPrefab, spawnPoint.position, spawnPoint.rotation);
 
-
-
     }
 }
 

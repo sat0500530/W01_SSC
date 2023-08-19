@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using Cinemachine;
 
-
 public class PlayerController : MonoBehaviour
 {
 
@@ -25,11 +24,15 @@ public class PlayerController : MonoBehaviour
 
     //float previousVelocityY;
     private bool isOnGround = false;
+    private bool isOnStone = false;
     private bool isDie = false;
 
     private Renderer objectRenderer;
     private Color initialColor;
     private Color targetColor = Color.red;
+
+    public new ParticleSystem particleSystem;
+
 
     private void Start()
     {
@@ -43,14 +46,16 @@ public class PlayerController : MonoBehaviour
 
         vCam = GameObject.Find("CM vcam1");
 
+        particleSystem = GetComponent<ParticleSystem>();
+
 }
 
     private void Update()
     {
 
-        Debug.Log("낙하 거리는 = " + fallingDistance);
-        Debug.Log("낙하 시작 지점은 = " + fallingStart.y);
-        Debug.Log("현재 땅인지 ? = " + isOnGround);
+        //Debug.Log("낙하 거리는 = " + fallingDistance);
+        //Debug.Log("낙하 시작 지점은 = " + fallingStart.y);
+        //Debug.Log("현재 땅인지 ? = " + isOnGround);
 
         //카메라에 포지션값 넘기기
         vCam.GetComponent<CinemachineVirtualCamera>().Follow = this.transform;
@@ -76,7 +81,7 @@ public class PlayerController : MonoBehaviour
         //캐릭터 이동
         if (gameManager.isGameActive && !isDie)
         {
-            Debug.Log("속도는 =" + rb.velocity);
+            //Debug.Log("속도는 =" + rb.velocity);
 
             if (!isOnGround && Mathf.Abs(rb.velocity.y) < 0.0001f && previousVelocityY < 0)
             {
@@ -90,6 +95,7 @@ public class PlayerController : MonoBehaviour
             //회전
             rb.AddTorque(-moveX / 20, ForceMode2D.Force);
 
+            //속도 제한
             if (rb.velocity.y < maxVelocity)
             {
                 rb.velocity = new Vector2(rb.velocity.x, maxVelocity);
@@ -101,12 +107,27 @@ public class PlayerController : MonoBehaviour
                 rb.AddForce(new Vector2(0f, jumpForce), ForceMode2D.Impulse);
                 isOnGround = false;
             }
-
             //변신
-            if (Input.GetKeyDown(KeyCode.LeftShift) || Input.GetKeyDown(KeyCode.X))
+            if (Input.GetKeyDown(KeyCode.X) && !isOnStone)
             {
                 ChangeToPlatform();
                 Destroy(this);
+            }
+
+            //붙은 도형 제거
+            if (Input.GetKeyDown(KeyCode.C) && isOnGround)
+            {
+                Vector2 boxSize = new (1.1f, 1.1f);
+                Collider2D[] colliders = Physics2D.OverlapBoxAll(transform.position, boxSize, 0f);
+
+                foreach (Collider2D collider in colliders)
+                {
+                    if (collider.CompareTag("Player") && collider.gameObject != gameObject)
+                    {
+                        Destroy(collider.gameObject);
+                    }
+                }
+
             }
 
             previousVelocityY = rb.velocity.y;
@@ -127,10 +148,21 @@ public class PlayerController : MonoBehaviour
             Die();
         }
 
+    }
+
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+
         if (collision.gameObject.tag == "Obstacle")
         {
             Die();
         }
+
+        if (collision.gameObject.tag == "Stone")
+        {
+            isOnStone = true;
+        }
+
 
     }
 
@@ -141,8 +173,15 @@ public class PlayerController : MonoBehaviour
         fallingStart = this.transform.position;
     }
 
+    private void OnTriggerExit2D(Collider2D collision)
+    {
+        isOnStone = false;
+    }
+
     private void Die()
     {
+        particleSystem.Play();
+        this.GetComponent<SpriteRenderer>().enabled = false;
         this.GetComponent<Animator>().SetBool("IsDie", true);
         rb.velocity = Vector2.zero;
         objectRenderer.material.color = Color.red;

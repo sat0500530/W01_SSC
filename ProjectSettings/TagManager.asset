@@ -8,6 +8,8 @@ TagManager:
   - Wall
   - Goal
   - Obstacle
+  - CanWall
+  - Stone
   layers:
   - Default
   - TransparentFX
