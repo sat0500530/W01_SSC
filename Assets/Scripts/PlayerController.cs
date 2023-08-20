@@ -22,7 +22,7 @@ public class PlayerController : MonoBehaviour
     private Vector2 fallingStart;
 
     public float cutBoxX = 1.5f;
-    public float cutBoxY = 1.3f;
+    public float cutBoxY = 1.5f;
 
     //float previousVelocityY;
     private bool isOnGround = false;
