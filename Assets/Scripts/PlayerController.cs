@@ -77,6 +77,11 @@ public class PlayerController : MonoBehaviour
             }
         }
 
+        if (isOnGround && !isDie)
+        {
+            objectRenderer.material.color = Color.white;
+        }
+
 
         //캐릭터 이동
         if (gameManager.isGameActive && !isDie)
@@ -142,6 +147,7 @@ public class PlayerController : MonoBehaviour
             isOnGround = true;
             fallingStart.y = 0f;
             fallingDistance = 0f;
+
         }
         if (collision.gameObject.tag == "Wall")
         {

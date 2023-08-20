@@ -1205,6 +1205,14 @@ PrefabInstance:
       propertyPath: path.timesTable.Array.data[1]
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 6923878538452516982, guid: 88ed9598a9d22fe45b853c67f3bd3a52, type: 3}
+      propertyPath: m_FlipX
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6923878538452516982, guid: 88ed9598a9d22fe45b853c67f3bd3a52, type: 3}
+      propertyPath: m_FlipY
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 7024291568035423553, guid: 88ed9598a9d22fe45b853c67f3bd3a52, type: 3}
       propertyPath: m_Name
       value: Bird
@@ -1212,6 +1220,10 @@ PrefabInstance:
     - target: {fileID: 7024291568035423553, guid: 88ed9598a9d22fe45b853c67f3bd3a52, type: 3}
       propertyPath: m_TagString
       value: Obstacle
+      objectReference: {fileID: 0}
+    - target: {fileID: 7649034412032261967, guid: 88ed9598a9d22fe45b853c67f3bd3a52, type: 3}
+      propertyPath: m_IsTrigger
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 88ed9598a9d22fe45b853c67f3bd3a52, type: 3}
