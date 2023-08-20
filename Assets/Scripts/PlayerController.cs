@@ -12,7 +12,6 @@ public class PlayerController : MonoBehaviour
     private float maxFallingDistance = 30f;
     private float fallingDistance = 0f;
 
-
     public CameraManager cameraManager;
     private GameManager gameManager;
     private Rigidbody2D rb;
@@ -21,6 +20,9 @@ public class PlayerController : MonoBehaviour
 
     float previousVelocityY;
     private Vector2 fallingStart;
+
+    public float cutBoxX = 1.5f;
+    public float cutBoxY = 1.3f;
 
     //float previousVelocityY;
     private bool isOnGround = false;
@@ -64,12 +66,15 @@ public class PlayerController : MonoBehaviour
         //낙하 중
         if (!isOnGround && !isDie)
         {
+            Falling();
+
+            //Debug.Log("낙하 거리 = " + fallingDistance);
+            //Debug.Log("낙하 시작 y값 = " + fallingStart.y);
+
             fallingDistance = fallingStart.y - this.transform.position.y;
 
             //낙하거리 비례 색 변환
-            float percentage = Mathf.Clamp01(fallingDistance / maxFallingDistance);
-            Color newColor = Color.Lerp(initialColor, targetColor, percentage);
-            objectRenderer.material.color = newColor;
+            ColorChange();
 
             if (fallingDistance > maxFallingDistance)
             {
@@ -79,7 +84,7 @@ public class PlayerController : MonoBehaviour
 
         if (isOnGround && !isDie)
         {
-            objectRenderer.material.color = Color.white;
+            OnGround();
         }
 
 
@@ -107,7 +112,7 @@ public class PlayerController : MonoBehaviour
             }
 
             //점프
-            if (Input.GetKeyDown(KeyCode.Space) && isOnGround)
+            if (Input.GetKey(KeyCode.Space) && isOnGround)
             {
                 rb.AddForce(new Vector2(0f, jumpForce), ForceMode2D.Impulse);
                 isOnGround = false;
@@ -120,15 +125,18 @@ public class PlayerController : MonoBehaviour
             }
 
             //붙은 도형 제거
-            if (Input.GetKeyDown(KeyCode.C) && isOnGround)
+            if (Input.GetKeyDown(KeyCode.C))
             {
-                Vector2 boxSize = new (1.1f, 1.1f);
+                Debug.Log("1");
+                Vector2 boxSize = new (cutBoxX, cutBoxY);
                 Collider2D[] colliders = Physics2D.OverlapBoxAll(transform.position, boxSize, 0f);
 
                 foreach (Collider2D collider in colliders)
                 {
+                    Debug.Log("2");
                     if (collider.CompareTag("Player") && collider.gameObject != gameObject)
                     {
+                        Debug.Log("3");
                         Destroy(collider.gameObject);
                     }
                 }
@@ -144,10 +152,7 @@ public class PlayerController : MonoBehaviour
     {
         if (collision.gameObject.tag == "Ground" || collision.gameObject.tag == "Player")
         {
-            isOnGround = true;
-            fallingStart.y = 0f;
-            fallingDistance = 0f;
-
+            OnGround();
         }
         if (collision.gameObject.tag == "Wall")
         {
@@ -174,14 +179,22 @@ public class PlayerController : MonoBehaviour
 
     private void OnCollisionExit2D(Collision2D collision)
     {
-        this.GetComponent<Animator>().SetBool("IsFalling", true);
-        isOnGround = false;
-        fallingStart = this.transform.position;
+        if (collision.gameObject.tag == "Ground" || collision.gameObject.tag == "Player")
+        {
+            Falling();
+            fallingStart = this.transform.position;
+
+        }
+
     }
 
     private void OnTriggerExit2D(Collider2D collision)
     {
-        isOnStone = false;
+        if (collision.gameObject.tag == "Stone")
+        {
+            isOnStone = false;
+        }
+
     }
 
     private void Die()
@@ -190,7 +203,7 @@ public class PlayerController : MonoBehaviour
         this.GetComponent<SpriteRenderer>().enabled = false;
         this.GetComponent<Animator>().SetBool("IsDie", true);
         rb.velocity = Vector2.zero;
-        objectRenderer.material.color = Color.red;
+        //objectRenderer.material.color = Color.red;
         Destroy(rb);
         isDie = true;
     }
@@ -206,5 +219,29 @@ public class PlayerController : MonoBehaviour
         Destroy(rb);
         objectRenderer.material.color = Color.white;
         spawnManager.SpawnPlayer();
+        Destroy(this);
+    }
+
+    private void OnGround()
+    {
+        isOnGround = true;
+        objectRenderer.material.color = Color.white;
+        this.GetComponent<Animator>().SetTrigger("IsIdle");
+        fallingStart.y = 0f;
+        fallingDistance = 0f;
+
+    }
+
+    private void Falling()
+    {
+        this.GetComponent<Animator>().SetTrigger("IsFalling");
+        isOnGround = false;
+    }
+
+    private void ColorChange()
+    {
+        float percentage = Mathf.Clamp01(fallingDistance / maxFallingDistance);
+        Color newColor = Color.Lerp(initialColor, targetColor, percentage);
+        objectRenderer.material.color = newColor;
     }
 }
