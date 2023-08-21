@@ -10,6 +10,7 @@ TagManager:
   - Obstacle
   - CanWall
   - Stone
+  - ClearPoint
   layers:
   - Default
   - TransparentFX

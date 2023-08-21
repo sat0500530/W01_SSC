@@ -6,9 +6,9 @@ using Cinemachine;
 public class PlayerController : MonoBehaviour
 {
 
-    public float moveSpeed = 5f;
-    public float jumpForce = 5f;
-    public float maxVelocity = -30f;
+    private float moveSpeed = 5f;
+    private float jumpForce = 5f;
+    private float maxVelocity = -30f;
     private float maxFallingDistance = 30f;
     private float fallingDistance = 0f;
 
@@ -21,13 +21,14 @@ public class PlayerController : MonoBehaviour
     float previousVelocityY;
     private Vector2 fallingStart;
 
-    public float cutBoxX = 1.5f;
-    public float cutBoxY = 1.5f;
+    private float cutBoxX = 1.8f;
+    private float cutBoxY = 1.8f;
 
     //float previousVelocityY;
     private bool isOnGround = false;
     private bool isOnStone = false;
     private bool isDie = false;
+    private bool isClear = false;
 
     private Renderer objectRenderer;
     private Color initialColor;
@@ -55,6 +56,7 @@ public class PlayerController : MonoBehaviour
     private void Update()
     {
 
+        Debug.Log("현재 속도는 = " + rb.velocity);
         //Debug.Log("낙하 거리는 = " + fallingDistance);
         //Debug.Log("낙하 시작 지점은 = " + fallingStart.y);
         //Debug.Log("현재 땅인지 ? = " + isOnGround);
@@ -64,7 +66,7 @@ public class PlayerController : MonoBehaviour
         cameraManager.SetTarget(transform.position);
 
         //낙하 중
-        if (!isOnGround && !isDie)
+        if (!isOnGround && !isDie && !isClear)
         {
             Falling();
 
@@ -102,8 +104,12 @@ public class PlayerController : MonoBehaviour
             Vector2 movement = new Vector2(moveX * moveSpeed, rb.velocity.y);
             rb.velocity = movement;
 
-            //회전
-            rb.AddTorque(-moveX / 20, ForceMode2D.Force);
+            if (!isClear)
+            {
+                //회전
+                rb.AddTorque(-moveX / 20, ForceMode2D.Force);
+            }
+
 
             //속도 제한
             if (rb.velocity.y < maxVelocity)
@@ -112,13 +118,13 @@ public class PlayerController : MonoBehaviour
             }
 
             //점프
-            if (Input.GetKey(KeyCode.Space) && isOnGround)
+            if (Input.GetKey(KeyCode.Space) && isOnGround && !isClear)
             {
                 rb.AddForce(new Vector2(0f, jumpForce), ForceMode2D.Impulse);
                 isOnGround = false;
             }
             //변신
-            if (Input.GetKeyDown(KeyCode.X) && !isOnStone)
+            if (Input.GetKeyDown(KeyCode.X) && !isOnStone && !isClear)
             {
                 ChangeToPlatform();
                 Destroy(this);
@@ -172,6 +178,7 @@ public class PlayerController : MonoBehaviour
         if (collision.gameObject.tag == "Stone")
         {
             isOnStone = true;
+            
         }
 
 
@@ -194,6 +201,13 @@ public class PlayerController : MonoBehaviour
         {
             isOnStone = false;
         }
+
+        if (collision.gameObject.tag == "ClearPoint")
+        {
+            isClear = true;
+            moveSpeed = 2f;
+        }
+
 
     }
 
