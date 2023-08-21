@@ -9,6 +9,7 @@ public class GameManager : MonoBehaviour
 {
     //public TextMeshPro lifeText;
     public TextMeshProUGUI lifeText;
+    public GameObject endingCreditUI;
 
     public int life = 0;
 
@@ -20,6 +21,7 @@ public class GameManager : MonoBehaviour
     void Start()
     {
         spawnManager = GameObject.Find("SpawnManager").GetComponent<SpawnManager>();
+        endingCreditUI.SetActive(false);
 
         isGameActive = true;
         spawnManager.SpawnPlayer();
@@ -31,7 +33,6 @@ public class GameManager : MonoBehaviour
     {
         lifeText.text = "x" + life;
     }
-
 
 
 }

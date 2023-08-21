@@ -208,6 +208,11 @@ public class PlayerController : MonoBehaviour
             moveSpeed = 2f;
         }
 
+        if (collision.gameObject.tag == "CreditPoint")
+        {
+            gameManager.endingCreditUI.SetActive(true);
+        }
+
 
     }
 
