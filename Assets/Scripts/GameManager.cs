@@ -7,6 +7,11 @@ using UnityEngine.SceneManagement;
 
 public class GameManager : MonoBehaviour
 {
+    //public TextMeshPro lifeText;
+    public TextMeshProUGUI lifeText;
+
+    public int life = 0;
+
 
     public bool isGameActive;
     public SpawnManager spawnManager;
@@ -24,7 +29,7 @@ public class GameManager : MonoBehaviour
 
     void Update()
     {
-
+        lifeText.text = "x" + life;
     }
 
 

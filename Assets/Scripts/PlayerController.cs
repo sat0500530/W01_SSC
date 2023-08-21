@@ -56,7 +56,7 @@ public class PlayerController : MonoBehaviour
     private void Update()
     {
 
-        Debug.Log("현재 속도는 = " + rb.velocity);
+        //Debug.Log("현재 속도는 = " + rb.velocity);
         //Debug.Log("낙하 거리는 = " + fallingDistance);
         //Debug.Log("낙하 시작 지점은 = " + fallingStart.y);
         //Debug.Log("현재 땅인지 ? = " + isOnGround);
